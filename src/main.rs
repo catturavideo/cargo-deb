@@ -4,6 +4,9 @@ extern crate rustc_serialize;
 extern crate toml;
 extern crate tar;
 extern crate lzma;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 extern crate zopfli;
 
 mod compress;

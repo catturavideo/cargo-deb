@@ -44,19 +44,20 @@ pub struct Config {
     /// A list of configuration files installed by the package.
     pub conf_files: Option<String>,
     /// All of the files that are to be packaged. `{ source_file, target_path, chmod }`
-    pub assets: Vec<Vec<String>>
+    pub assets: Vec<Vec<String>>,
 }
 
 impl Config {
     pub fn new() -> Config {
         let mut content = String::new();
         manifest_contents(&current_manifest_path(), &mut content);
-        toml::decode_str::<Cargo>(&content).try("cargo-deb: could not decode manifest").to_config()
+        let value: Cargo = toml::from_str(content.as_str()).unwrap();
+        value.to_config()
     }
 }
 
 
-#[derive(Clone, Debug, RustcDecodable)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Cargo {
     pub package: CargoPackage,
 }
@@ -78,22 +79,28 @@ impl Cargo {
             section: self.package.metadata.deb.section.clone(),
             priority: self.package.metadata.deb.priority.clone(),
             architecture: get_arch().to_owned(),
-            conf_files: self.package.metadata.deb.conf_files.clone()
+            conf_files: self.package
+                .metadata
+                .deb
+                .conf_files
+                .clone()
                 .map(|x| x.iter().fold(String::new(), |a, b| a + b + "\n")),
             assets: self.package.metadata.deb.assets.clone(),
         }
     }
 
     fn get_dependencies(&self, input: &str) -> String {
-        input.split_whitespace().map(|word| match word {
-            "$auto"  => resolve(String::from("target/release/") + &self.package.name),
-            "$auto," => resolve(String::from("target/release/") + &self.package.name + ","),
-            _        => word.to_owned()
-        }).join(" ")
+        input.split_whitespace()
+            .map(|word| match word {
+                "$auto" => resolve(String::from("target/release/") + &self.package.name),
+                "$auto," => resolve(String::from("target/release/") + &self.package.name + ","),
+                _ => word.to_owned(),
+            })
+            .join(" ")
     }
 }
 
-#[derive(Clone, Debug, RustcDecodable)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct CargoPackage {
     pub name: String,
     pub license: String,
@@ -101,15 +108,15 @@ pub struct CargoPackage {
     pub repository: String,
     pub version: String,
     pub description: String,
-    pub metadata: CargoMetadata
+    pub metadata: CargoMetadata,
 }
 
-#[derive(Clone, Debug, RustcDecodable)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct CargoMetadata {
-    pub deb: CargoDeb
+    pub deb: CargoDeb,
 }
 
-#[derive(Clone, Debug, RustcDecodable)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct CargoDeb {
     pub maintainer: String,
     pub copyright: String,
@@ -124,12 +131,18 @@ pub struct CargoDeb {
 
 /// Returns the path of the `Cargo.toml` that we want to build.
 fn current_manifest_path() -> PathBuf {
-    let output = Command::new("cargo").arg("locate-project").output()
+    let output = Command::new("cargo")
+        .arg("locate-project")
+        .output()
         .try("cargo-deb: unable to obtain output of `cargo locate-proect`");
-    if !output.status.success() { exit(output.status.code().unwrap_or(-1)); }
+    if !output.status.success() {
+        exit(output.status.code().unwrap_or(-1));
+    }
 
     #[derive(RustcDecodable)]
-    struct Data { root: String }
+    struct Data {
+        root: String,
+    }
     let stdout = String::from_utf8(output.stdout).unwrap();
     let decoded: Data = rustc_serialize::json::decode(&stdout).unwrap();
     Path::new(&decoded.root).to_owned()
