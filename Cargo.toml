@@ -27,8 +27,8 @@ itertools = "0.4.17"
 libc = "0.2.15"
 rust-lzma = "0.2.1"
 rustc-serialize = "0.3.19"
-serde = "*"
-serde_derive = "*"
+serde = "0.9.7"
+serde_derive = "0.9.7"
 tar = { git = "https://github.com/mmstick/tar-rs" }
 toml = "0.3.0"
 zopfli = "0.3.0"
@@ -36,4 +36,3 @@ zopfli = "0.3.0"
 [profile.release]
 lto = true
 opt-level = 3
-
