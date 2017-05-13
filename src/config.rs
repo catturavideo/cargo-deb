@@ -45,6 +45,8 @@ pub struct Config {
     pub conf_files: Option<String>,
     /// All of the files that are to be packaged. `{ source_file, target_path, chmod }`
     pub assets: Vec<Vec<String>>,
+    /// Control scripts
+    pub control_scripts: Vec<String>
 }
 
 impl Config {
@@ -86,6 +88,7 @@ impl Cargo {
                 .clone()
                 .map(|x| x.iter().fold(String::new(), |a, b| a + b + "\n")),
             assets: self.package.metadata.deb.assets.clone(),
+            control_scripts: self.package.metadata.deb.control_scripts.clone()
         }
     }
 
@@ -127,6 +130,7 @@ pub struct CargoDeb {
     pub priority: String,
     pub conf_files: Option<Vec<String>>,
     pub assets: Vec<Vec<String>>,
+    pub control_scripts: Vec<String>
 }
 
 /// Returns the path of the `Cargo.toml` that we want to build.

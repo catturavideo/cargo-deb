@@ -8,6 +8,8 @@ use tar::Builder as TarBuilder;
 use tar::Header as TarHeader;
 use tar::EntryType;
 
+use archive::copy_files;
+
 const CHMOD_FILE:       u32 = 420;
 const CHMOD_BIN_OR_DIR: u32 = 493;
 
@@ -17,6 +19,9 @@ pub fn generate_archive(archive: &mut TarBuilder<Vec<u8>>, options: &Config, tim
     generate_md5sums(archive, options, time);
     generate_control(archive, options, time);
     generate_conf_files(archive, options.conf_files.as_ref(), time);
+    copy_files(archive, &options.control_scripts.iter().map(|script| {
+        vec![script.clone(), String::from(""), String::from("755")]
+    }).collect(), time);
 }
 
 /// Creates the initial hidden directory where all the files are stored.
