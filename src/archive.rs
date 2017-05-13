@@ -8,7 +8,8 @@ use tar::EntryType;
 
 use try::Try;
 
-const CHMOD_BIN_OR_DIR: u32 = 493;
+pub const CHMOD_FILE:       u32 = 420;
+pub const CHMOD_BIN_OR_DIR: u32 = 493;
 
 /// Copies all the files to be packaged into the tar archive.
 pub fn copy_files(archive: &mut TarBuilder<Vec<u8>>, assets: &Vec<Vec<String>>, time: u64) {

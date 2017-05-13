@@ -7,10 +7,7 @@ use tar::EntryType;
 
 use config::Config;
 use try::{failed, Try};
-use archive::copy_files;
-
-const CHMOD_FILE:       u32 = 420;
-const CHMOD_BIN_OR_DIR: u32 = 493;
+use archive::{copy_files, CHMOD_FILE, CHMOD_BIN_OR_DIR};
 
 /// Generates the uncompressed control.tar archive
 pub fn generate_archive(archive: &mut TarBuilder<Vec<u8>>, options: &Config, time: u64) {
