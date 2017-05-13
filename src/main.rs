@@ -10,6 +10,7 @@ extern crate serde_derive;
 extern crate zopfli;
 
 mod compress;
+mod archive;
 mod config;
 mod control;
 mod data;
